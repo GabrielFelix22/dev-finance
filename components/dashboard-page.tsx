@@ -23,9 +23,12 @@ interface Transaction {
   category: string;
 }
 
-// Dados iniciais de exemplo removidos
-// const initialTransactionsData = [ ... ]
-// const initialCategories = [ ... ]
+interface Category {
+  id: string;
+  name: string;
+  color: string;
+  type: string;
+}
 
 export function DashboardPage() {
   const [showNewTransaction, setShowNewTransaction] = useState(false)
@@ -36,7 +39,7 @@ export function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([])
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([])
-  const [categories, setCategories] = useState([]) // Inicializa como vazio
+  const [categories, setCategories] = useState<Category[]>([]) // Tipado como Category
   const [balanceData, setBalanceData] = useState({
     balance: 0,
     income: 0,
@@ -49,30 +52,47 @@ export function DashboardPage() {
     type: "success",
   })
 
-  // Recupera as transações do localStorage após a montagem do componente
-  useEffect(() => {
-    const savedTransactions = localStorage.getItem("transactions")
-    if (savedTransactions) {
-      setAllTransactions(JSON.parse(savedTransactions))
+  // Função para carregar dados iniciais do localStorage
+  const loadInitialData = () => {
+    try {
+      const savedTransactions = localStorage.getItem("transactions")
+      const savedCategories = localStorage.getItem("categories")
+
+      if (savedTransactions) {
+        setAllTransactions(JSON.parse(savedTransactions))
+      }
+      if (savedCategories) {
+        setCategories(JSON.parse(savedCategories))
+      }
+    } catch (error) {
+      console.error("Erro ao carregar dados do localStorage:", error)
+      showToast("Erro ao carregar dados salvos.", "error")
     }
+  }
+
+  // Carrega os dados ao montar o componente
+  useEffect(() => {
+    loadInitialData()
   }, [])
 
-  // Recupera as categorias do localStorage após a montagem do componente
+  // Salva transações no localStorage quando mudarem
   useEffect(() => {
-    const savedCategories = localStorage.getItem("categories")
-    if (savedCategories) {
-      setCategories(JSON.parse(savedCategories))
+    try {
+      localStorage.setItem("transactions", JSON.stringify(allTransactions))
+    } catch (error) {
+      console.error("Erro ao salvar transações no localStorage:", error)
+      showToast("Erro ao salvar transações.", "error")
     }
-  }, [])
-
-  // Salva as transações no localStorage sempre que mudarem
-  useEffect(() => {
-    localStorage.setItem("transactions", JSON.stringify(allTransactions))
   }, [allTransactions])
 
-  // Salva as categorias no localStorage sempre que mudarem
+  // Salva categorias no localStorage quando mudarem
   useEffect(() => {
-    localStorage.setItem("categories", JSON.stringify(categories))
+    try {
+      localStorage.setItem("categories", JSON.stringify(categories))
+    } catch (error) {
+      console.error("Erro ao salvar categorias no localStorage:", error)
+      showToast("Erro ao salvar categorias.", "error")
+    }
   }, [categories])
 
   // Aplicar filtro quando as datas, termo de busca ou transações mudarem
@@ -88,17 +108,14 @@ export function DashboardPage() {
 
         return matchesDate && matchesSearch
       })
-
-      setFilteredTransactions(filtered)
-      setShowTransactions(true)
     } else {
-      // Se não houver filtro de data, mostrar todas as transações
-      filtered = filtered.filter((transaction) => {
-        return searchTerm === "" || transaction.description.toLowerCase().includes(searchTerm.toLowerCase())
-      })
-      setFilteredTransactions(filtered)
-      setShowTransactions(true)
+      filtered = filtered.filter((transaction) =>
+        searchTerm === "" || transaction.description.toLowerCase().includes(searchTerm.toLowerCase())
+      )
     }
+
+    setFilteredTransactions(filtered)
+    setShowTransactions(true)
 
     // Calcular saldo, receitas e despesas
     const income = filtered.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0)
@@ -122,12 +139,11 @@ export function DashboardPage() {
       })
 
     setCategoryData(categoryAmounts)
-
   }, [dateFrom, dateTo, searchTerm, allTransactions])
 
   const handleAddTransaction = (transaction: any) => {
-    const newTransaction = {
-      id: `t${allTransactions.length + 1}`,
+    const newTransaction: Transaction = {
+      id: `t${Date.now()}`, // ID único baseado em timestamp
       description: transaction.name,
       amount: transaction.type === "expense" ? -Math.abs(transaction.value) : Math.abs(transaction.value),
       date: transaction.date,
@@ -148,8 +164,8 @@ export function DashboardPage() {
   }
 
   const handleAddCategory = (category: any) => {
-    const newCategory = {
-      id: `c${categories.length + 1}`,
+    const newCategory: Category = {
+      id: `c${Date.now()}`, // ID único baseado em timestamp
       name: category.name,
       color: category.color,
       type: category.type,
@@ -161,7 +177,6 @@ export function DashboardPage() {
   }
 
   const handleDeleteCategory = (categoryId: string) => {
-    // Encontrar a categoria pelo ID
     const categoryToDelete = categories.find((c) => c.id === categoryId)
 
     if (!categoryToDelete) {
@@ -169,7 +184,6 @@ export function DashboardPage() {
       return
     }
 
-    // Verificar se a categoria está sendo usada em alguma transação
     const isUsed = allTransactions.some((t) => t.category === categoryToDelete.name)
 
     if (isUsed) {
@@ -191,7 +205,7 @@ export function DashboardPage() {
   }
 
   const handleApplyFilter = () => {
-    // O filtro já é aplicado automaticamente pelo useEffect
+    // Filtro já aplicado automaticamente pelo useEffect
   }
 
   const handleClearFilter = () => {
@@ -422,4 +436,3 @@ export function DashboardPage() {
     </div>
   )
 }
-
