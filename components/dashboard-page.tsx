@@ -14,6 +14,15 @@ import { ptBR } from "date-fns/locale"
 import { AlertCircle, Calendar, CheckCircle2, Plus, Search } from "lucide-react"
 import { useEffect, useState } from "react"
 
+interface Transaction {
+  id: string;
+  description: string;
+  amount: number;
+  date: string;
+  type: "income" | "expense";
+  category: string;
+}
+
 // Dados iniciais de exemplo removidos
 // const initialTransactionsData = [ ... ]
 // const initialCategories = [ ... ]
@@ -25,8 +34,8 @@ export function DashboardPage() {
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined)
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined)
   const [searchTerm, setSearchTerm] = useState("")
-  const [allTransactions, setAllTransactions] = useState([]) // Inicializa como vazio
-  const [filteredTransactions, setFilteredTransactions] = useState([]) // Inicializa como vazio
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([])
+  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([])
   const [categories, setCategories] = useState([]) // Inicializa como vazio
   const [balanceData, setBalanceData] = useState({
     balance: 0,
@@ -113,6 +122,7 @@ export function DashboardPage() {
       })
 
     setCategoryData(categoryAmounts)
+
   }, [dateFrom, dateTo, searchTerm, allTransactions])
 
   const handleAddTransaction = (transaction: any) => {
@@ -191,21 +201,17 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#000]">
-      <div className="flex-1 p-6 pr-[340px]">
-        {" "}
-        {/* Ajustado para acomodar o painel lateral fixo */}
-        <div className="mb-6">
-          <h1 className="text-green-500 font-semibold text-xl mb-1">
-            <span className="text-white">Dev</span>bills<span className="text-green-500">/</span>
-          </h1>
-          <div className="mb-4">
+    <div className="container">
+      <div className="flex-1 p-6">
+        <div className="section">
+          <h1>Receitas e Gastos no período</h1>
+          <div className="mb-6">
             <h2 className="text-lg font-semibold text-white">Saldo</h2>
             <p className="text-sm text-gray-400">Receitas e despesas no período</p>
           </div>
 
           {/* Cards de Saldo, Receitas e Gastos */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <Card className="bg-[#111] border-none">
               <CardContent className="p-4 flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
@@ -250,7 +256,7 @@ export function DashboardPage() {
           </div>
 
           {/* Gráficos */}
-          <div className="grid grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
             <Card className="bg-[#111] border-none">
               <CardContent className="p-4">
                 <div className="flex flex-col gap-1">
@@ -371,22 +377,11 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* Painel lateral fixo de transações */}
-      <div className="fixed right-0 top-0 w-[320px] h-full bg-[#111] border-l border-gray-800 overflow-hidden flex flex-col">
+      {/* Painel lateral de transações */}
+      <div className="sidebar">
         <div className="p-6">
-          <div className="mb-4">
-            <h3 className="text-base font-semibold text-white">Transações</h3>
-            <p className="text-xs text-gray-400">
-              {dateFrom && dateTo ? (
-                <>
-                  {format(dateFrom, "dd/MM/yyyy", { locale: ptBR })} até{" "}
-                  {format(dateTo, "dd/MM/yyyy", { locale: ptBR })}
-                </>
-              ) : (
-                "Todas as transações"
-              )}
-            </p>
-          </div>
+          <h3 className="text-base font-semibold text-white">Transações</h3>
+          <p className="text-xs text-gray-400">Todas as transações</p>
         </div>
         <div className="flex-1 overflow-hidden">
           <TransactionList transactions={allTransactions} onDelete={handleDeleteTransaction} />

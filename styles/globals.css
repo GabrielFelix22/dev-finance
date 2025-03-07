@@ -4,6 +4,10 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #000;
+  color: #fff;
 }
 
 /* Media Queries para Responsividade */
@@ -14,6 +18,14 @@ body {
 
   .card {
     flex-direction: column;
+  }
+
+  .flex {
+    flex-direction: column;
+  }
+
+  .fixed {
+    position: relative;
   }
 }
 
@@ -112,5 +124,89 @@ img {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Container principal */
+.container {
+  display: flex;
+  flex-direction: column; /* Coluna para telas menores */
+  min-height: 100vh;
+  padding: 10px; /* Adiciona padding para telas menores */
+}
+
+/* Seções */
+.section {
+  margin: 0.5rem 0; /* Margem reduzida para evitar quebra */
+  padding: 1rem;
+  background-color: #111;
+  border-radius: 8px;
+}
+
+/* Estilos para telas maiores */
+@media (min-width: 768px) {
+  .container {
+    flex-direction: row; /* Linha para telas maiores */
+  }
+
+  .section {
+    flex: 1; /* Cada seção ocupa espaço igual */
+    margin: 1rem; /* Margem para telas maiores */
+  }
+
+  .transactions {
+    order: 1; /* Mover a seção de transações para o topo */
+  }
+}
+
+/* Estilo específico para a seção de transações */
+.transactions {
+  margin-top: 1rem; /* Espaçamento acima da seção de transações */
+}
+
+/* Estilo do painel lateral */
+.sidebar {
+  width: 100%; /* Largura total em telas menores */
+  position: relative; /* Para que não fique fixo */
+}
+
+@media (min-width: 768px) {
+  .sidebar {
+    position: fixed; /* Fixo em telas maiores */
+    right: 0;
+    top: 0;
+    width: 320px; /* Largura fixa */
+    height: 100vh; /* Altura total */
+    background-color: #111;
+    border-left: 1px solid #333; /* Borda para separação */
+  }
+}
+
+/* Ajustes para garantir que os cards e botões não quebrem */
+.card {
+  flex: 1; /* Para que os cards ocupem espaço igual */
+  min-width: 0; /* Para evitar que quebrem */
+  margin-bottom: 1rem; /* Espaçamento entre os cards */
+}
+
+.button {
+  width: 100%; /* Botões ocupam toda a largura disponível */
+}
+
+/* Ajustes para telas menores que 785px */
+@media (max-width: 785px) {
+  .section {
+    flex-direction: column; /* Coluna para telas menores */
+    margin: 0; /* Remover margens para evitar quebra */
+    padding: 0.5rem; /* Ajustar o padding */
+  }
+
+  .card {
+    width: 100%; /* Cards ocupam toda a largura */
+  }
+
+  .button {
+    width: 100%; /* Botões ocupam toda a largura disponível */
+    margin-top: 0.5rem; /* Espaçamento entre os botões */
   }
 }
